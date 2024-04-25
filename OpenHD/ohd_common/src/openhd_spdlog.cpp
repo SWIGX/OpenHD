@@ -7,6 +7,7 @@
 #include <spdlog/common.h>
 #include <spdlog/spdlog.h>
 //
+#include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/base_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
@@ -76,6 +77,19 @@ openhd::log::MavlinkLogMessageBuffer&
 openhd::log::MavlinkLogMessageBuffer::instance() {
   static MavlinkLogMessageBuffer singleton;
   return singleton;
+}
+
+std::shared_ptr<spdlog::logger> openhd::log::create_or_get_filelogger(
+  const std::string& logger_name){
+  static std::mutex flogger_mutex{};
+  std::lock_guard<std::mutex> guard(flogger_mutex);
+  auto ret = spdlog::get(logger_name);
+  if (ret == nullptr) {
+    auto created = spdlog::basic_logger_mt(logger_name, "logs/" + logger_name + ".log");
+    assert(created);
+    return created;
+  }
+  return ret;
 }
 
 std::shared_ptr<spdlog::logger> openhd::log::create_or_get(

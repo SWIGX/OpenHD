@@ -19,6 +19,9 @@ namespace openhd::log{
 // Note: the _mt loggers have threadsafety by design already, but we need to make sure to crete the instance only once
 // For some reason there is no helper for that in speeddlog / i haven't found it yet
 
+// Log to file. Uses spdlog::basic_logger_mt
+std::shared_ptr<spdlog::logger> create_or_get_filelogger(const std::string&  logger_name);
+
 // Thread-safe but recommended to store result in an intermediate variable
 std::shared_ptr<spdlog::logger> create_or_get(const std::string& logger_name);
 
