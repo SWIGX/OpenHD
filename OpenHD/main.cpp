@@ -57,6 +57,7 @@ struct OHDRunOptions {
 static OHDRunOptions parse_run_parameters(int argc, char *argv[]) {
   OHDRunOptions ret{};
   int c;
+  
   // If this value gets set, we assume a developer is working on OpenHD and skip
   // the discovery via file(s).
   std::optional<bool> commandline_air = std::nullopt;
@@ -203,6 +204,12 @@ int main(int argc, char *argv[]) {
       openhd::log::create_or_get("main");
   assert(m_console);
 
+  auto filelogger = openhd::log::create_or_get_filelogger(
+    "main_log",
+    4096,
+    4
+  );
+  assert(filelogger);
   // not guaranteed, but better than nothing, check if openhd is already running
   // (kinda) and print warning if yes.
   openhd::check_currently_running_file_and_write();
@@ -233,7 +240,9 @@ int main(int argc, char *argv[]) {
     if (!openhd::load_config().GEN_NO_QOPENHD_AUTOSTART &&
         !OHDPlatform::instance().is_x20()) {
       if (!profile.is_air) {
+        filelogger->info("Ground Station: Start QOpenHD");
         OHDUtil::run_command("systemctl", {"start", "qopenhd"});
+
       } else {
         OHDUtil::run_command("systemctl", {"stop", "qopenhd"});
       }
@@ -280,6 +289,8 @@ int main(int argc, char *argv[]) {
     ohdTelemetry->settings_generic_ready();
     // now telemetry can send / receive data via wifibroadcast
     ohdTelemetry->set_link_handle(ohdInterface->get_link_handle());
+    filelogger->info("All OpenHD modules running");
+
     m_console->info("All OpenHD modules running");
     openhd::LEDManager::instance().set_status_okay();
     openhd::log::log_to_kernel("All OpenHD modules running");
@@ -297,8 +308,11 @@ int main(int argc, char *argv[]) {
       quit = true;
     });
     const auto run_time_begin = std::chrono::steady_clock::now();
+    int it = 0;
     while (!quit) {
       std::this_thread::sleep_for(std::chrono::seconds(2));
+      filelogger->info("Main thread idle it: " + std::to_string(it));
+      it++;
       if (options.run_time_seconds >= 1) {
         if (std::chrono::steady_clock::now() - run_time_begin >=
             std::chrono::seconds(options.run_time_seconds)) {
