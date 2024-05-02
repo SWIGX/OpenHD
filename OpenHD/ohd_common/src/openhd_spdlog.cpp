@@ -92,8 +92,8 @@ openhd::log::MavlinkLogMessageBuffer::instance() {
 */
 std::shared_ptr<spdlog::logger> openhd::log::create_or_get_filelogger(
     const std::string& logger_name,
-    const int max_filesize = (1024 * 2),
-    const int max_files = 3
+    const int max_filesize = (1024 * 2),  // default max size = 2kB
+    const int max_files = 1
   ){
   static std::mutex flogger_mutex{};
   std::lock_guard<std::mutex> guard(flogger_mutex);
