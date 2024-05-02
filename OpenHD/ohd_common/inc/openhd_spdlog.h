@@ -20,7 +20,7 @@ namespace openhd::log{
 // For some reason there is no helper for that in speeddlog / i haven't found it yet
 
 // Log to file. Uses spdlog::basic_logger_mt
-std::shared_ptr<spdlog::logger> create_or_get_filelogger(const std::string&  logger_name);
+std::shared_ptr<spdlog::logger> create_or_get_filelogger(const std::string&  logger_name, const int max_filesize, const int max_files);
 
 // Thread-safe but recommended to store result in an intermediate variable
 std::shared_ptr<spdlog::logger> create_or_get(const std::string& logger_name);

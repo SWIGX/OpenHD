@@ -8,7 +8,7 @@
 #include <spdlog/spdlog.h>
 //
 #include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/base_sink.h>
+#include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 #include <iostream>
@@ -79,13 +79,25 @@ openhd::log::MavlinkLogMessageBuffer::instance() {
   return singleton;
 }
 
+/*
+* Create a rotating file logger. 
+* Once log size exceeds the max_filesize it creates a new file until max_files
+* If all files are full, it 'rotates' back to the beginning
+*/
 std::shared_ptr<spdlog::logger> openhd::log::create_or_get_filelogger(
-  const std::string& logger_name){
+    const std::string& logger_name,
+    const int max_filesize = (1024 * 5),
+    const int max_files = 3
+  ){
   static std::mutex flogger_mutex{};
   std::lock_guard<std::mutex> guard(flogger_mutex);
   auto ret = spdlog::get(logger_name);
   if (ret == nullptr) {
-    auto created = spdlog::basic_logger_mt(logger_name, "logs/" + logger_name + ".log");
+    auto created = spdlog::rotating_logger_mt(
+        logger_name, "logs/" + logger_name + ".log",
+        max_filesize,
+        max_files
+    );
     assert(created);
     return created;
   }
