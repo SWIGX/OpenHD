@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_subdirectory(../ohd_common commonlib EXCLUDE_FROM_ALL)
 
 # Build and include wifibroadcast
-include(../lib/wifibroadcast/WBLib.cmake)
+include(lib/wifibroadcast/wifibroadcast/WBLib.cmake)
 
 add_library(OHDInterfaceLib STATIC) # initialized below
 add_library(OHDInterfaceLib::OHDInterfaceLib ALIAS OHDInterfaceLib)
@@ -21,12 +21,13 @@ set(sources
     src/wifi_hotspot.cpp
     src/wb_link_helper.cpp
     src/wifi_command_helper.cpp
-    src/ethernet_listener.cpp
-    src/ethernet_hotspot.cpp
-    src/wifi_card.cpp
+        src/wifi_card.cpp
     src/wb_link_manager.cpp
     src/networking_settings.cpp
     src/wb_link_settings.cpp
+    src/wifi_client.cpp
+    src/microhard_link.cpp
+    src/ethernet_manager.cpp
     #src/wifi_command_helper2.cpp
 )
 
@@ -51,17 +52,12 @@ target_link_libraries(OHDInterfaceLib PUBLIC OHDCommonLib)
 
 
 target_include_directories(OHDInterfaceLib PUBLIC inc/)
-target_include_directories(OHDInterfaceLib PUBLIC lib/include)
 target_link_libraries(OHDInterfaceLib PUBLIC ${WB_TARGET_LINK_LIBRARIES})
 #target_include_directories(OHDInterfaceLib PUBLIC ${WB_INCLUDE_DIRECTORES})
 
 #for some reason, otherwise pi complains about threads
 find_package(Threads REQUIRED)
 target_link_libraries(OHDInterfaceLib PUBLIC Threads::Threads)
-
-# this one is here but not really part of interface
-add_executable(test_led test/test_led.cpp)
-target_link_libraries(test_led OHDInterfaceLib)
 
 # Custom testing
 add_executable(test_interface test/test_interface.cpp)
