@@ -205,10 +205,11 @@ int main(int argc, char *argv[]) {
   assert(m_console);
 
   auto filelogger = openhd::log::create_or_get_filelogger(
-    "main_log",
+    "main_logs",
     4096,
-    4
+    2
   );
+  filelogger->warn("Hello world");
   assert(filelogger);
   // not guaranteed, but better than nothing, check if openhd is already running
   // (kinda) and print warning if yes.
@@ -290,6 +291,7 @@ int main(int argc, char *argv[]) {
     // now telemetry can send / receive data via wifibroadcast
     ohdTelemetry->set_link_handle(ohdInterface->get_link_handle());
     filelogger->info("All OpenHD modules running");
+    filelogger->flush();
 
     m_console->info("All OpenHD modules running");
     openhd::LEDManager::instance().set_status_okay();
@@ -328,6 +330,7 @@ int main(int argc, char *argv[]) {
                          openhd::TerminateHelper::instance().terminate_reason());
         break;
       }
+      filelogger->flush();
     }
     // --- terminate openhd, most likely requested by a developer with sigterm
     m_console->debug("Terminating openhd");
